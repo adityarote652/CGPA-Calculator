@@ -1,0 +1,6 @@
+{
+  "name": "CGPA & SGPA Calculator",
+  "description": "Comprehensive CGPA & SGPA Calculator for engineering students with academic goal settings, dynamic mark tables, and persistent multi-semester dashboards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

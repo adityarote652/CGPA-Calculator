@@ -1,0 +1,99 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile containing basic college details and configurations",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Unique Firebase Authentication User ID"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "Verification email address of the student"
+        },
+        "name": {
+          "type": "string",
+          "description": "Full name of the student"
+        },
+        "college": {
+          "type": "string",
+          "description": "Autonomous Engineering College Name"
+        },
+        "department": {
+          "type": "string",
+          "description": "Academic engineering department"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of last modification"
+        }
+      },
+      "required": ["uid", "email", "name", "createdAt", "updatedAt"]
+    },
+    "Semester": {
+      "title": "Semester",
+      "description": "Academic semester containing subject marks, credits, and calculated SGPA",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique Semester Document ID"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Owner student's user ID"
+        },
+        "semesterNumber": {
+          "type": "integer",
+          "description": "The specific semester number (e.g. 1 to 8)"
+        },
+        "sgpa": {
+          "type": "number",
+          "description": "Calculated Semester Grade Point Average"
+        },
+        "totalCredits": {
+          "type": "number",
+          "description": "Total semester credits"
+        },
+        "subjects": {
+          "type": "array",
+          "description": "List of engineering subjects evaluated in this semester"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of last modification"
+        }
+      },
+      "required": ["id", "userId", "semesterNumber", "sgpa", "totalCredits", "subjects", "createdAt", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Student profiles"
+    },
+    "/users/{userId}/semesters/{semesterId}": {
+      "schema": {
+        "$ref": "#/entities/Semester"
+      },
+      "description": "Student semester records containing marks and subject calculations"
+    }
+  }
+}

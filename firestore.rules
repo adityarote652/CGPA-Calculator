@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 1. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Reusable, hardened global helpers
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // User profile schema and integrity helper
+    function isValidUser(data) {
+      return data.uid == request.auth.uid
+        && data.email is string && data.email.size() <= 200
+        && data.name is string && data.name.size() <= 100
+        && (!data.keys().hasAll(['college']) || (data.college is string && data.college.size() <= 200))
+        && (!data.keys().hasAll(['department']) || (data.department is string && data.department.size() <= 200))
+        && data.createdAt == (resource == null ? request.time : resource.data.createdAt)
+        && data.updatedAt == request.time;
+    }
+
+    // Semester schema and credit limits validation helper
+    function isValidSemester(data, userId) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == userId
+        && data.semesterNumber is int && data.semesterNumber >= 1 && data.semesterNumber <= 20
+        && data.sgpa is number && data.sgpa >= 0.0 && data.sgpa <= 10.0
+        && data.totalCredits is number && data.totalCredits >= 0 && data.totalCredits <= 100
+        && data.subjects is list && data.subjects.size() <= 50
+        && data.createdAt == (resource == null ? request.time : resource.data.createdAt)
+        && data.updatedAt == request.time;
+    }
+
+    // Match users Collection
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming())
+        && incoming().uid == existing().uid
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'college', 'department', 'updatedAt']);
+      allow delete: if false;
+    }
+
+    // Match Semesters Collection (Sub-collection of user for security containment)
+    match /users/{userId}/semesters/{semesterId} {
+      allow list, get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidId(semesterId) && isValidSemester(incoming(), userId);
+      allow update: if isOwner(userId) && isValidId(semesterId) && isValidSemester(incoming(), userId)
+        && incoming().id == existing().id
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt
+        && incoming().diff(existing()).affectedKeys().hasOnly(['semesterNumber', 'sgpa', 'totalCredits', 'subjects', 'updatedAt']);
+      allow delete: if isOwner(userId) && isValidId(semesterId);
+    }
+  }
+}
