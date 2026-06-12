@@ -32,7 +32,6 @@ import {
 } from "lucide-react";
 import DynamicBackground from "./components/DynamicBackground";
 import AuthPage from "./components/AuthPage";
-import GoalSetter from "./components/GoalSetter";
 import SemesterTable from "./components/SemesterTable";
 
 export default function App() {
@@ -113,8 +112,10 @@ export default function App() {
   };
 
   const handleSignOut = async () => {
-    if (window.confirm("Are you sure you want to log out of your academic dashboard?")) {
+    try {
       await signOut(auth);
+    } catch (err) {
+      console.error("Error signing out:", err);
     }
   };
 
@@ -401,9 +402,6 @@ export default function App() {
                   </div>
                 </div>
               </motion.div>
-
-              {/* What-If Goal Setter Section */}
-              <GoalSetter />
 
               {/* Main dynamic semesters list */}
               <div className="flex justify-between items-center mt-4">

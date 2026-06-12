@@ -31,6 +31,8 @@ export default function SemesterTable({
 }: SemesterTableProps) {
   const [subjects, setSubjects] = useState<Subject[]>(semester.subjects || []);
 
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   useEffect(() => {
     setSubjects(semester.subjects || []);
   }, [semester.subjects]);
@@ -180,17 +182,41 @@ export default function SemesterTable({
             )}
           </span>
 
-          <button
-            onClick={() => {
-              if (window.confirm("Are you sure you want to delete this completed semester and all its associated subjects?")) {
-                onDelete(semester.id);
-              }
-            }}
-            className="p-2 text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-xl transition-all cursor-pointer"
-            title="Delete Semester"
-          >
-            <Trash2 className="w-4.5 h-4.5" />
-          </button>
+          {showDeleteConfirm ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="flex items-center gap-2 bg-rose-500/10 dark:bg-rose-505/5 border border-rose-500/20 px-2.5 py-1.5 rounded-xl font-sans"
+            >
+              <span className="text-[11px] font-bold text-rose-500 dark:text-rose-450 mr-1 select-none">
+                Delete Semester?
+              </span>
+              <button
+                onClick={() => {
+                  onDelete(semester.id);
+                  setShowDeleteConfirm(false);
+                }}
+                className="px-2 py-1 bg-red-600 hover:bg-red-700 text-white font-extrabold text-[10px] rounded-lg transition-all"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="px-2 py-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-extrabold text-[10px] rounded-lg transition-all"
+              >
+                No
+              </button>
+            </motion.div>
+          ) : (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="p-2 text-red-500 hover:text-red-600 hover:bg-red-500/10 rounded-xl transition-all cursor-pointer"
+              title="Delete Semester"
+            >
+              <Trash2 className="w-4.5 h-4.5" />
+            </button>
+          )}
         </div>
       </div>
 
